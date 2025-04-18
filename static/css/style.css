@@ -1,0 +1,68 @@
+.ship-row {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.ship-top-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.ship-name {
+    font-weight: bold;
+    min-width: 120px;
+    margin-right: 15px;
+}
+
+.upgrade-slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-grow: 1;
+    margin-right: 15px;
+}
+
+.upgrade-slot {
+    width: 120px;
+}
+
+.upgrade-slot select {
+    width: 100%;
+}
+
+.ship-count-select {
+    width: 70px;
+}
+
+.stats-summary-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ccc;
+}
+
+.stats-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    font-size: 0.9rem;
+}
+
+.stat-item {
+    background-color: #f8f9fa;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid #e9ecef;
+}
+
+.results-table {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.results-table th, .results-table td {
+    padding: 8px;
+    text-align: center;
+} 
