@@ -79,8 +79,8 @@ function createCountSelect(shipType, side) {
         select.appendChild(option);
     }
     
-    // Set default count to 0
-    select.value = 0;
+    // Set default count to 1
+    select.value = 1;
     
     // Add change event to update stats when count changes
     select.addEventListener('change', function() {
@@ -126,15 +126,31 @@ function updateShipStats(shipType, side) {
 
 function addNewShip(side) {
     const shipsDiv = document.getElementById(`${side}-ships`);
-    const shipType = 'interceptor'; // Default to interceptor for new ships
-    
+
+    // Find the first available ship type for this side
+    const usedTypes = new Set();
+    shipsDiv.querySelectorAll('.ship-type-select').forEach(select => {
+        usedTypes.add(select.value);
+    });
+
+    let firstAvailableType = null;
+    for (const type of Object.keys(shipConfigs)) {
+        if (!usedTypes.has(type)) {
+            firstAvailableType = type;
+            break;
+        }
+    }
+
+    // If all types are used, do nothing
+    if (!firstAvailableType) return;
+
     // Create a new container for this ship group
     const shipGroup = document.createElement('div');
     shipGroup.className = 'ship-group';
-    
-    // Create the ship row
-    const shipRow = createShipRow(shipType, side);
-    
+
+    // Create the ship row with the first available type
+    const shipRow = createShipRow(firstAvailableType, side);
+
     // Add a remove button
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-ship-btn';
@@ -142,15 +158,15 @@ function addNewShip(side) {
     removeBtn.onclick = function() {
         shipGroup.remove();
     };
-    
+
     // Add elements to the group
     shipGroup.appendChild(shipRow);
-    
+
     // Add the group to the ships container
     shipsDiv.appendChild(shipGroup);
-    
+
     // Update stats for the new ship
-    updateShipStats(shipType, side);
+    updateShipStats(firstAvailableType, side);
 }
 
 function createShipRow(shipType, side) {
@@ -302,9 +318,40 @@ function updateShipCounts() {
     return { attackerShips, defenderShips };
 }
 
-function displayResults(results) {
+function createShipSummary(title, ships, colorVar) {
+    // ships: { shipType: { count, ... }, ... }
+    const container = document.createElement('div');
+    container.className = 'ship-summary';
+
+    const heading = document.createElement('div');
+    heading.className = 'ship-summary-heading';
+    heading.textContent = title;
+    heading.style.color = `var(${colorVar})`;
+    container.appendChild(heading);
+
+    const list = document.createElement('ul');
+    list.className = 'ship-summary-list';
+
+    Object.entries(ships).forEach(([type, info]) => {
+        const li = document.createElement('li');
+        li.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)}: ${info.count}`;
+        list.appendChild(li);
+    });
+
+    container.appendChild(list);
+    return container;
+}
+
+function displayResults(results, shipData) {
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = ''; // Clear previous results
+
+    // Use the shipData you sent to the backend for the summary
+    const summarySection = document.createElement('div');
+    summarySection.className = 'results-summary-section';
+    summarySection.appendChild(createShipSummary('Attacker Ships', shipData.attacker, '--attacker-color'));
+    summarySection.appendChild(createShipSummary('Defender Ships', shipData.defender, '--defender-color'));
+    resultsDiv.appendChild(summarySection);
 
     // Calculate percentage
     const attackerPercent = Math.round(results.attacker_win_probability * 100);

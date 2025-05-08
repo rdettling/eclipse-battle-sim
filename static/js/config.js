@@ -201,6 +201,7 @@ const availableUpgrades = {
         image: "gluon_computer.png",
         name: "Gluon Computer",
         effect: {
+            computer: 3
         }
     },
     fluxMissile: {

@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            displayResults(data);
+            displayResults(data, shipData); // shipData is what you sent in the fetch
         })
         .catch(error => {
             console.error('Error:', error);
