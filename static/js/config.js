@@ -52,37 +52,37 @@ const shipConfigs = {
         maxCount: 2,
         upgradeSlots: 3,
         baseStats: {
-            hull: 3,
-            computer: 2,
-            shield: 2,
-            initiative: 1,
-            power: 3
+            hull: 1,
+            computer: 0,
+            shield: 0,
+            initiative: 2,
+            power: 0
         },
-        defaultUpgrades: ['hull', 'shield', 'power'] // Default upgrades for ancient
+        defaultUpgrades: ['electronComputer', 'ionCannon', 'ionCannon']
     },
     guardian: {
         maxCount: 1,
         upgradeSlots: 4,
         baseStats: {
-            hull: 4,
-            computer: 3,
-            shield: 3,
-            initiative: 1,
-            power: 4
+            hull: 2,
+            computer: 0,
+            shield: 0,
+            initiative: 3,
+            power: 0
         },
-        defaultUpgrades: ['hull', 'shield', 'computer', 'power'] // Default upgrades for guardian
+        defaultUpgrades: ['ionCannon', 'ionCannon', 'ionCannon', 'positronComputer'] // Default upgrades for guardian
     },
     gcds: {
         maxCount: 1,
-        upgradeSlots: 3,
+        upgradeSlots: 5,
         baseStats: {
             hull: 3,
-            computer: 2,
-            shield: 2,
-            initiative: 1,
-            power: 3
+            computer: 0,
+            shield: 0,
+            initiative: 2,
+            power: 0
         },
-        defaultUpgrades: ['hull', 'shield', 'computer'] // Default upgrades for gcds
+        defaultUpgrades: ['fluxMissile', 'fluxMissile', 'antimatterCannon', 'positronComputer'] // Default upgrades for gcds
     }
 };
 

@@ -6,7 +6,7 @@ The backend simulates space battles between two fleets (attacker and defender) u
    The backend receives JSON data describing the ships for both attacker and defender, including their types, upgrades, and stats.
 
 2. **Simulation Loop**  
-   For each simulation (default: 2000 times), the following steps are performed:
+   For each simulation (default: 1000 times), the following steps are performed:
    - **Missile Phase**  
      Each ship with missiles targets an enemy ship, dealing damage. If all ships on one side are destroyed by missiles, the battle ends immediately.
    - **Battle Rounds**  
