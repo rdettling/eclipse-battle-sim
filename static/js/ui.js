@@ -33,7 +33,19 @@ function createUpgradeSlot(shipType, side, slotIndex) {
     // Add change event to update stats when upgrade changes
     select.addEventListener('change', function() {
         updateShipStats(shipType, side);
+        // Update tooltip when selection changes
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            this.setAttribute('data-tooltip', selectedOption.text);
+        } else {
+            this.removeAttribute('data-tooltip');
+        }
     });
+    
+    // Set initial tooltip if there's a default value
+    if (select.value) {
+        select.setAttribute('data-tooltip', select.options[select.selectedIndex].text);
+    }
     
     slot.appendChild(select);
     return slot;
@@ -97,6 +109,35 @@ function updateShipStats(shipType, side) {
     }
 }
 
+function addNewShip(side) {
+    const shipsDiv = document.getElementById(`${side}-ships`);
+    const shipType = 'interceptor'; // Default to interceptor for new ships
+    
+    // Create a new container for this ship group
+    const shipGroup = document.createElement('div');
+    shipGroup.className = 'ship-group';
+    
+    // Create the ship row
+    const shipRow = createShipRow(shipType, side);
+    
+    // Add a remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-ship-btn';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = function() {
+        shipGroup.remove();
+    };
+    
+    // Add elements to the group
+    shipGroup.appendChild(shipRow);
+    
+    // Add the group to the ships container
+    shipsDiv.appendChild(shipGroup);
+    
+    // Update stats for the new ship
+    updateShipStats(shipType, side);
+}
+
 function createShipRow(shipType, side) {
     const row = document.createElement('div');
     row.className = 'ship-row mb-3';
@@ -105,10 +146,53 @@ function createShipRow(shipType, side) {
     const topRow = document.createElement('div');
     topRow.className = 'ship-top-row';
     
-    // Ship name
+    // Ship name with type selector
     const shipName = document.createElement('div');
     shipName.className = 'ship-name';
-    shipName.textContent = shipDisplayNames[shipType];
+    
+    const typeSelect = document.createElement('select');
+    typeSelect.className = 'form-control form-control-sm ship-type-select';
+    typeSelect.name = `${side}_${shipType}_type`;
+    
+    // Get existing ship types for this side
+    const existingShips = new Set();
+    document.querySelectorAll(`#${side}-ships .ship-type-select`).forEach(select => {
+        if (select !== typeSelect) {  // Don't include the current select
+            existingShips.add(select.value);
+        }
+    });
+    
+    // Add ship type options, excluding existing ones
+    for (const [type, config] of Object.entries(shipConfigs)) {
+        if (!existingShips.has(type)) {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = shipDisplayNames[type];
+            typeSelect.appendChild(option);
+        }
+    }
+    
+    // Set initial value
+    typeSelect.value = shipType;
+    
+    // Add change event to update ship configuration when type changes
+    typeSelect.addEventListener('change', function() {
+        const newType = this.value;
+        const upgradeSlots = row.querySelector('.upgrade-slots');
+        const statsDiv = row.querySelector('.stats-summary-container');
+        
+        // Update upgrade slots
+        upgradeSlots.innerHTML = '';
+        for (let i = 0; i < shipConfigs[newType].upgradeSlots; i++) {
+            upgradeSlots.appendChild(createUpgradeSlot(newType, side, i));
+        }
+        
+        // Update stats
+        statsDiv.id = `${side}-${newType}-stats`;
+        updateShipStats(newType, side);
+    });
+    
+    shipName.appendChild(typeSelect);
     
     // Upgrade slots
     const upgradeSlots = document.createElement('div');
@@ -121,10 +205,19 @@ function createShipRow(shipType, side) {
     // Count select
     const countSelect = createCountSelect(shipType, side);
     
+    // Add a remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-ship-btn';
+    removeBtn.textContent = '×';
+    removeBtn.onclick = function() {
+        row.closest('.ship-group').remove();
+    };
+    
     // Add all elements to the top row
     topRow.appendChild(shipName);
     topRow.appendChild(upgradeSlots);
     topRow.appendChild(countSelect);
+    topRow.appendChild(removeBtn);
     
     // Stats summary
     const statsDiv = document.createElement('div');

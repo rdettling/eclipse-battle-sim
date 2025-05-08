@@ -1,24 +1,26 @@
 // Main Application Logic
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize ship rows for both sides
-    const attackerShipsDiv = document.getElementById('attacker-ships');
-    const defenderShipsDiv = document.getElementById('defender-ships');
+    const attackerShips = document.getElementById('attacker-ships');
+    const defenderShips = document.getElementById('defender-ships');
     
-    // Create ship rows
-    for (const shipType of Object.keys(shipConfigs)) {
-        attackerShipsDiv.appendChild(createShipRow(shipType, 'attacker'));
-        defenderShipsDiv.appendChild(createShipRow(shipType, 'defender'));
-    }
+    // Add initial ships
+    addNewShip('attacker');
+    addNewShip('defender');
     
-    // Force update of all ship stats to ensure they're displayed immediately
-    for (const shipType of Object.keys(shipConfigs)) {
-        updateShipStats(shipType, 'attacker');
-        updateShipStats(shipType, 'defender');
-    }
+    // Set up Add Ship buttons
+    document.getElementById('add-attacker-ship').addEventListener('click', () => addNewShip('attacker'));
+    document.getElementById('add-defender-ship').addEventListener('click', () => addNewShip('defender'));
     
-    // Add event listeners
-    document.getElementById('submitBtn').addEventListener('click', function() {
-        const { attackerShips, defenderShips } = updateShipCounts();
+    // Set up form submission
+    document.getElementById('ship-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect ship data
+        const shipData = {
+            attacker: updateShipCounts('attacker'),
+            defender: updateShipCounts('defender')
+        };
         
         // Send data to server
         fetch('/submit_ships', {
@@ -26,33 +28,23 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                attacker_ships: attackerShips,
-                defender_ships: defenderShips
-            })
+            body: JSON.stringify(shipData)
         })
         .then(response => response.json())
         .then(data => {
-            displayResults(data.results);
+            displayResults(data);
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred during simulation');
+            alert('An error occurred while processing the battle.');
         });
     });
     
-    // Add reset button functionality
-    document.getElementById('resetBtn').addEventListener('click', function() {
-        // Reset all ship counts to 0
-        const countSelects = document.querySelectorAll('.ship-count-select');
+    // Set up reset button
+    document.getElementById('reset-counts').addEventListener('click', function() {
+        const countSelects = document.querySelectorAll('.count-select');
         countSelects.forEach(select => {
-            select.value = 0;
+            select.value = '0';
         });
-        
-        // Update stats for all ships
-        for (const shipType of Object.keys(shipConfigs)) {
-            updateShipStats(shipType, 'attacker');
-            updateShipStats(shipType, 'defender');
-        }
     });
 }); 

@@ -3,55 +3,58 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Eclipse Battle Sim</title>
+        <title>Eclipse Battle Simulator</title>
         <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='eclipse.jpeg') }}" />
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
         <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
     </head>
     <body>
-        <div class="container-fluid text-center">
-            <h2 class="mt-3">Eclipse Battle Simulation</h2>
+        <div class="container">
+            <h1>Eclipse Battle Simulator</h1>
+            
             <form id="ship-form">
-                <div class="row">
-                    <!-- Attacker Column -->
-                    <div class="col">
-                        <h3 class="mt-4">Attacker</h3>
-                        <div id="attacker-ships" class="ship-list">
-                            <!-- Ship rows will be generated here -->
-                        </div>
+                <div class="battle-sides">
+                    <div class="side attacker">
+                        <h2>Attacker</h2>
+                        <div id="attacker-ships" class="ships-container"></div>
+                        <button type="button" id="add-attacker-ship" class="add-ship-btn">Add Ship</button>
                     </div>
-
-                    <!-- Defender Column -->
-                    <div class="col">
-                        <h3 class="mt-4">Defender</h3>
-                        <div id="defender-ships" class="ship-list">
-                            <!-- Ship rows will be generated here -->
-                        </div>
+                    
+                    <div class="side defender">
+                        <h2>Defender</h2>
+                        <div id="defender-ships" class="ships-container"></div>
+                        <button type="button" id="add-defender-ship" class="add-ship-btn">Add Ship</button>
                     </div>
+                </div>
+                
+                <div class="controls">
+                    <button type="submit" id="submitBtn">Simulate Battle</button>
+                    <button type="button" id="reset-counts">Reset Counts</button>
                 </div>
             </form>
+            
+            <div id="results" class="results-container"></div>
+        </div>
 
-            <div id="buttons" class="d-flex justify-content-center mt-4">
-                <button type="button" id="submitBtn" class="btn btn-primary m-2">Submit</button>
-                <button type="button" id="resetBtn" class="btn btn-danger m-2">Reset</button>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col">
-                    <h3>Attacker Ships</h3>
-                    <div id="attacker-summary"></div>
-                </div>
-                <div class="col">
-                    <h3>Defender Ships</h3>
-                    <div id="defender-summary"></div>
-                </div>
-            </div>
-
-            <div id="result" class="mt-4">
-                <h3>Win Probability:</h3>
-                <div class="progress">
-                    <div id="attacker-win-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">Attacker: 0%</div>
-                    <div id="defender-win-progress" class="progress-bar bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">Defender: 0%</div>
+        <!-- Ship Type Selection Modal -->
+        <div class="modal fade" id="shipTypeModal" tabindex="-1" role="dialog" aria-labelledby="shipTypeModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="shipTypeModalLabel">Select Ship Type</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <select id="shipTypeSelect" class="form-control">
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmShipType">Add Ship</button>
+                    </div>
                 </div>
             </div>
         </div>
