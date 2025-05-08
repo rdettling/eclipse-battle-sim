@@ -201,42 +201,36 @@ const availableUpgrades = {
         image: "gluon_computer.png",
         name: "Gluon Computer",
         effect: {
-            computer: 3
         }
     },
     fluxMissile: {
         image: "flux_missile.png",
         name: "Flux Missile",
         effect: {
-            ionMissile: 2
         }
     },
     ionCannon: {
         image: "ion_cannon.png",
         name: "Ion Cannon",
         effect: {
-            ionCannon: 1
         }
     },
     plasmaCannon: {
         image: "plasma_cannon.png",
         name: "Plasma Cannon",
         effect: {
-            plasmaCannon: 1
         }
     },
     solitonCannon: {
         image: "soliton_cannon.png",
         name: "Soliton Cannon",
         effect: {
-            solitonCannon: 1
         }
     },
     antimatterCannon: {
         image: "antimatter_cannon.png",
         name: "Antimatter Cannon",
         effect: {
-            antimatterCannon: 1
         }
     },
     gaussShield: {
@@ -264,7 +258,6 @@ const availableUpgrades = {
         image: "plasma_missile.png",
         name: "Plasma Missile",
         effect: {
-            plasmaMissile: 2
         }
     }    
 }; 

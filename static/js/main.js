@@ -16,13 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ship-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Collect ship data
         const shipData = {
-            attacker: updateShipCounts('attacker'),
-            defender: updateShipCounts('defender')
+            attacker: collectShipsForSide('attacker'),
+            defender: collectShipsForSide('defender')
         };
         
-        // Send data to server
         fetch('/submit_ships', {
             method: 'POST',
             headers: {
@@ -47,4 +45,44 @@ document.addEventListener('DOMContentLoaded', function() {
             select.value = '0';
         });
     });
-}); 
+});
+
+function collectShipsForSide(side) {
+    const ships = {};
+    // For each ship group (row) for this side
+    document.querySelectorAll(`#${side}-ships .ship-row`).forEach(row => {
+        const typeSelect = row.querySelector('.ship-type-select');
+        const shipType = typeSelect.value;
+
+        // Get count
+        const countSelect = row.querySelector('.ship-count-select');
+        const count = parseInt(countSelect.value, 10);
+
+        // Get upgrades
+        const upgrades = [];
+        row.querySelectorAll('.upgrade-slots .upgrade-slot select').forEach(select => {
+            if (select.value) upgrades.push(select.value);
+        });
+
+        // Get stats
+        const stats = {};
+        // You may want to get these from your config or from the UI if they are editable
+        // Here, we assume stats are displayed in the stats-summary-container
+        const statsDiv = row.querySelector('.stats-summary-container');
+        if (statsDiv) {
+            statsDiv.querySelectorAll('.stat-item').forEach(item => {
+                const [stat, value] = item.textContent.split(':').map(s => s.trim());
+                stats[stat] = Number(value);
+            });
+        }
+
+        if (count > 0) {
+            ships[shipType] = {
+                count,
+                stats,
+                upgrades
+            };
+        }
+    });
+    return ships;
+} 

@@ -1,12 +1,21 @@
+:root {
+    --attacker-color: #40d925;
+    --defender-color: #4444ff;
+}
+
 .container {
     max-width: 85%;
     margin: 0 auto;
     padding: 20px;
 }
 
-h1 {
+h1, h2 {
     text-align: center;
     color: #333;
+    margin-bottom: 20px;
+}
+
+h1 {
     margin-bottom: 30px;
 }
 
@@ -25,17 +34,11 @@ h1 {
 }
 
 .attacker {
-    border: 2px solid #ff4444;
+    border: 2px solid var(--attacker-color);
 }
 
 .defender {
-    border: 2px solid #4444ff;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #444;
+    border: 2px solid var(--defender-color);
 }
 
 .ships-container {
@@ -66,54 +69,57 @@ h2 {
 
 .upgrade-slots {
     display: flex;
-    gap: 10px;
-    flex: 2;
+    flex-wrap: nowrap;
+    gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    align-items: center;
 }
 
-.ship-row label {
-    flex: 1;
-    margin-right: 10px;
-}
-
-.ship-row select {
-    width: 80px;
+.ship-row select,
+.ship-count-select {
     padding: 5px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    position: relative;
 }
 
-.ship-row select option {
-    padding: 5px;
-    white-space: nowrap;
-    animation: scrollText 10s linear infinite;
+.ship-count-select {
+    width: 70px;
 }
 
-@keyframes scrollText {
-    0% {
-        text-indent: 0;
-    }
-    90% {
-        text-indent: -100%;
-    }
-    100% {
-        text-indent: 0;
-    }
-}
-
-.add-ship-btn {
-    width: 100%;
+.add-ship-btn,
+.controls button,
+.remove-ship-btn {
     padding: 10px;
-    background-color: #4CAF50;
-    color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
+    color: white;
+}
+
+.add-ship-btn {
+    width: 100%;
+    background-color: #4CAF50;
 }
 
 .add-ship-btn:hover {
     background-color: #45a049;
+}
+
+.remove-ship-btn {
+    background-color: #dc3545;
+    height: 31px;
+    line-height: 1;
+    padding: 5px 10px;
+}
+
+.remove-ship-btn:hover {
+    background-color: #c82333;
 }
 
 .controls {
@@ -125,16 +131,11 @@ h2 {
 
 .controls button {
     padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
     font-size: 16px;
-    transition: background-color 0.3s;
 }
 
 #submitBtn {
     background-color: #2196F3;
-    color: white;
 }
 
 #submitBtn:hover {
@@ -143,7 +144,6 @@ h2 {
 
 #reset-counts {
     background-color: #f44336;
-    color: white;
 }
 
 #reset-counts:hover {
@@ -165,7 +165,7 @@ h2 {
 
 .results-table th,
 .results-table td {
-    padding: 10px;
+    padding: 8px;
     text-align: center;
     border: 1px solid #ddd;
 }
@@ -177,10 +177,6 @@ h2 {
 
 .results-table tr:nth-child(even) {
     background-color: #f9f9f9;
-}
-
-.ship-count-select {
-    width: 70px;
 }
 
 .stats-summary-container {
@@ -204,28 +200,61 @@ h2 {
     border: 1px solid #e9ecef;
 }
 
-.results-table {
-    margin-top: 20px;
+.upgrade-slot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    width: 80px;   /* Match your chosen size */
+    height: 80px;
+}
+
+.upgrade-image,
+.upgrade-placeholder {
     width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
-.results-table th, .results-table td {
-    padding: 8px;
-    text-align: center;
+.upgrade-placeholder {
+    border: 2px solid #000;
+    background: none;
+    box-sizing: border-box;
+    border-radius: 6px;
 }
 
-.remove-ship-btn {
-    padding: 5px 10px;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
+.upgrade-slot select {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 2;
+    opacity: 0;
     cursor: pointer;
-    transition: background-color 0.3s;
-    height: 31px;
-    line-height: 1;
+    padding: 0;
+    border: none;
 }
 
-.remove-ship-btn:hover {
-    background-color: #c82333;
+.win-bar-container {
+    width: 100%;
+    height: 32px;
+    background: #eee;
+    border-radius: 8px;
+    margin: 20px 0 10px 0;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+.win-bar-attacker {
+    height: 100%;
+    background: var(--attacker-color);
+    transition: width 0.5s;
+}
+
+.win-bar-defender {
+    height: 100%;
+    background: var(--defender-color);
+    transition: width 0.5s;
 }

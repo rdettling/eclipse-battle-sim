@@ -14,20 +14,63 @@ def serve_static(filename):
 def index():
     return render_template("index.html")
 
+# Weapon types
+CANNON_TYPES = ["ionCannon", "plasmaCannon", "solitonCannon", "antimatterCannon"]
+MISSILE_TYPES = ["ionMissile", "plasmaMissile", "solitonMissile", "antimatterMissile"]
+
+def expand_ships(ship_dict, side):
+    ships = []
+
+    for ship_type, info in ship_dict.items():
+        print(f'{ship_type} {info}')
+        count = info.get("count", 0)
+        upgrades = info.get("upgrades", [])
+        stats = info.get("stats", {})
+
+        # Count cannons and missiles from upgrades
+        cannons = {w.replace("Cannon", ""): 0 for w in CANNON_TYPES}
+        missiles = {w.replace("Missile", ""): 0 for w in MISSILE_TYPES}
+        for upgrade in upgrades:
+            if upgrade in CANNON_TYPES:
+                key = upgrade.replace("Cannon", "")
+                cannons[key] += 1
+            elif upgrade in MISSILE_TYPES:
+                key = upgrade.replace("Missile", "")
+                missiles[key] += 1
+
+        for i in range(count):
+            ship = {
+                "id": f"{side}-{ship_type}-{i+1}",
+                "health": stats.get("hull", 0) + 1,
+                "initiative": stats.get("initiative", 0),
+                "side": side,
+                "plus": stats.get("computer", 0),
+                "minus": stats.get("shield", 0),
+                "cannons": cannons.copy(),
+                "missiles": missiles.copy(),
+                # Add any other fields your simulation expects
+            }
+            ships.append(ship)
+    return ships
+
 
 @app.route("/submit_ships", methods=["POST"])
 def submit_ships():
-    data = request.form
+    data = request.get_json()
 
-    attacker_ships = extract_ship_data(data, "attacker")
-    defender_ships = extract_ship_data(data, "defender")
+    attacker_ships = expand_ships(data.get("attacker", {}), "attacker")
+    defender_ships = expand_ships(data.get("defender", {}), "defender")
 
     simulations = 2000
 
-    print(attacker_ships)
-    print(defender_ships)
+    print("Attacker ships:")
+    for ship in attacker_ships: 
+        print(ship)
+    print("Defender ships:")
+    for ship in defender_ships:
+        print(ship)
 
-    # Simulate 1000 battles and count victories
+    # Simulate 2000 battles and count victories
     attacker_victories = sum(
         simulate_battle(attacker_ships, defender_ships) == "attacker"
         for _ in range(simulations)
@@ -40,13 +83,14 @@ def submit_ships():
         "defender_win_probability": defender_victories / simulations,
     }
 
+    print(win_probability)
     return jsonify(win_probability)
 
 
 def simulate_battle(attacker_ships, defender_ships):
     all_ships = sorted(
         attacker_ships + defender_ships,
-        key=lambda x: (-x["priority"], x["side"] == "attacker"),
+        key=lambda x: (-x["initiative"], x["side"] == "attacker"),
     )
 
     damage_taken = {ship["id"]: 0 for ship in all_ships}
@@ -178,46 +222,7 @@ def roll_dice(ship, opponent_minus, weapon_type):
     return total_damage
 
 
-def extract_ship_data(data, side):
-    ships = []
-    for key, value in data.items():
-        if key.startswith(side) and key.endswith("count") and int(value) > 0:
-            ship_base = "-".join(key.split("-")[:-1])  # e.g., "attacker-interceptor"
-            ship_type = key.split("-")[1]  # e.g., "interceptor"
-            count = int(value)
 
-            for i in range(count):
-                ship_id = (
-                    f"{ship_base}-{i+1}"  # Unique identifier for each ship instance
-                )
-                ships.append(
-                    {
-                        "id": ship_id,
-                        "type": ship_type,
-                        "cannons": {
-                            "ion": int(data.get(f"{ship_base}-ion-cannon", 0)),
-                            "plasma": int(data.get(f"{ship_base}-plasma-cannon", 0)),
-                            "soliton": int(data.get(f"{ship_base}-soliton-cannon", 0)),
-                            "antimatter": int(
-                                data.get(f"{ship_base}-antimatter-cannon", 0)
-                            ),
-                        },
-                        "missiles": {
-                            "ion": int(data.get(f"{ship_base}-ion-missile", 0)),
-                            "plasma": int(data.get(f"{ship_base}-plasma-missile", 0)),
-                            "soliton": int(data.get(f"{ship_base}-soliton-missile", 0)),
-                            "antimatter": int(
-                                data.get(f"{ship_base}-antimatter-missile", 0)
-                            ),
-                        },
-                        "health": int(data.get(f"{ship_base}-hull", 0)) + 1,
-                        "priority": int(data.get(f"{ship_base}-priority", 0)),
-                        "side": side,
-                        "plus": int(data.get(f"{ship_base}-plus", 0)),
-                        "minus": int(data.get(f"{ship_base}-minus", 0)),
-                    }
-                )
-    return ships
 
 
 if __name__ == "__main__":

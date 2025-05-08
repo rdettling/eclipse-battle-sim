@@ -30,23 +30,38 @@ function createUpgradeSlot(shipType, side, slotIndex) {
         }
     }
     
-    // Add change event to update stats when upgrade changes
-    select.addEventListener('change', function() {
-        updateShipStats(shipType, side);
-        // Update tooltip when selection changes
-        const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.value) {
-            this.setAttribute('data-tooltip', selectedOption.text);
-        } else {
-            this.removeAttribute('data-tooltip');
-        }
-    });
+    // Create an image element to display the selected upgrade
+    const upgradeImage = document.createElement('img');
+    upgradeImage.className = 'upgrade-image';
+    upgradeImage.style.display = 'none';
     
-    // Set initial tooltip if there's a default value
-    if (select.value) {
-        select.setAttribute('data-tooltip', select.options[select.selectedIndex].text);
+    // Create a placeholder for empty slot
+    const emptyPlaceholder = document.createElement('div');
+    emptyPlaceholder.className = 'upgrade-placeholder';
+    
+    // Update image/placeholder when select changes
+    function updateSlotVisual() {
+        const selectedOption = select.options[select.selectedIndex];
+        if (selectedOption.value) {
+            upgradeImage.src = `/static/upgrades/${availableUpgrades[selectedOption.value].image}`;
+            upgradeImage.style.display = 'block';
+            emptyPlaceholder.style.display = 'none';
+        } else {
+            upgradeImage.style.display = 'none';
+            emptyPlaceholder.style.display = 'block';
+        }
     }
     
+    select.addEventListener('change', function() {
+        updateShipStats(shipType, side);
+        updateSlotVisual();
+    });
+    
+    // Set initial visual
+    updateSlotVisual();
+    
+    slot.appendChild(upgradeImage);
+    slot.appendChild(emptyPlaceholder);
     slot.appendChild(select);
     return slot;
 }
@@ -142,7 +157,7 @@ function createShipRow(shipType, side) {
     const row = document.createElement('div');
     row.className = 'ship-row mb-3';
     
-    // First row: Ship name, upgrade slots, and count
+    // First row: Ship name and count
     const topRow = document.createElement('div');
     topRow.className = 'ship-top-row';
     
@@ -194,14 +209,6 @@ function createShipRow(shipType, side) {
     
     shipName.appendChild(typeSelect);
     
-    // Upgrade slots
-    const upgradeSlots = document.createElement('div');
-    upgradeSlots.className = 'upgrade-slots';
-    
-    for (let i = 0; i < shipConfigs[shipType].upgradeSlots; i++) {
-        upgradeSlots.appendChild(createUpgradeSlot(shipType, side, i));
-    }
-    
     // Count select
     const countSelect = createCountSelect(shipType, side);
     
@@ -213,19 +220,27 @@ function createShipRow(shipType, side) {
         row.closest('.ship-group').remove();
     };
     
-    // Add all elements to the top row
+    // Add elements to the top row
     topRow.appendChild(shipName);
-    topRow.appendChild(upgradeSlots);
     topRow.appendChild(countSelect);
     topRow.appendChild(removeBtn);
+    
+    // Upgrade slots row
+    const upgradeSlots = document.createElement('div');
+    upgradeSlots.className = 'upgrade-slots';
+    
+    for (let i = 0; i < shipConfigs[shipType].upgradeSlots; i++) {
+        upgradeSlots.appendChild(createUpgradeSlot(shipType, side, i));
+    }
     
     // Stats summary
     const statsDiv = document.createElement('div');
     statsDiv.id = `${side}-${shipType}-stats`;
     statsDiv.className = 'stats-summary-container';
     
-    // Add rows to the main container
+    // Add all rows to the main container
     row.appendChild(topRow);
+    row.appendChild(upgradeSlots);
     row.appendChild(statsDiv);
     
     // Initialize stats
@@ -289,37 +304,34 @@ function updateShipCounts() {
 
 function displayResults(results) {
     const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '';
-    
-    // Create results table
-    const table = document.createElement('table');
-    table.className = 'results-table table table-striped';
-    
-    // Add header row
-    const headerRow = document.createElement('tr');
-    ['Ship Type', 'Attacker Count', 'Defender Count', 'Attacker Lost', 'Defender Lost'].forEach(text => {
-        const th = document.createElement('th');
-        th.textContent = text;
-        headerRow.appendChild(th);
-    });
-    table.appendChild(headerRow);
-    
-    // Add data rows
-    for (const [shipType, data] of Object.entries(results)) {
-        const row = document.createElement('tr');
-        [
-            shipDisplayNames[shipType],
-            data.attackerCount,
-            data.defenderCount,
-            data.attackerLost,
-            data.defenderLost
-        ].forEach(text => {
-            const td = document.createElement('td');
-            td.textContent = text;
-            row.appendChild(td);
-        });
-        table.appendChild(row);
-    }
-    
-    resultsDiv.appendChild(table);
-} 
+    resultsDiv.innerHTML = ''; // Clear previous results
+
+    // Calculate percentage
+    const attackerPercent = Math.round(results.attacker_win_probability * 100);
+    const defenderPercent = 100 - attackerPercent;
+
+    // Create bar container
+    const barContainer = document.createElement('div');
+    barContainer.className = 'win-bar-container';
+
+    // Attacker bar
+    const attackerBar = document.createElement('div');
+    attackerBar.className = 'win-bar-attacker';
+    attackerBar.style.width = `${attackerPercent}%`;
+
+    // Defender bar
+    const defenderBar = document.createElement('div');
+    defenderBar.className = 'win-bar-defender';
+    defenderBar.style.width = `${defenderPercent}%`;
+
+    barContainer.appendChild(attackerBar);
+    barContainer.appendChild(defenderBar);
+
+    // Add label
+    const label = document.createElement('div');
+    label.className = 'win-bar-label';
+    label.textContent = `Attacker: ${attackerPercent}% | Defender: ${defenderPercent}%`;
+
+    resultsDiv.appendChild(barContainer);
+    resultsDiv.appendChild(label);
+}
