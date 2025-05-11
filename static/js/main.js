@@ -49,8 +49,31 @@ function collectShipsForSide(side) {
             const [stat, value] = item.textContent.split(':').map(s => s.trim());
             stats[stat] = Number(value);
         });
+
+        // Construct dice dictionary
+        const dice = {
+            cannons: {},
+            missiles: {}
+        };
+
+        // Process upgrades to build dice dictionary
+        upgrades.forEach(upgradeId => {
+            const upgrade = availableUpgrades[upgradeId];
+            if (upgrade && upgrade.effect) {
+                Object.entries(upgrade.effect).forEach(([key, value]) => {
+                    if (key.endsWith('Cannon')) {
+                        const cannonType = key.replace('Cannon', '');
+                        dice.cannons[cannonType] = (dice.cannons[cannonType] || 0) + value;
+                    } else if (key.endsWith('Missile')) {
+                        const missileType = key.replace('Missile', '');
+                        dice.missiles[missileType] = (dice.missiles[missileType] || 0) + value;
+                    }
+                });
+            }
+        });
+
         if (count > 0) {
-            ships[shipType] = { count, stats, upgrades };
+            ships[shipType] = { count, stats, upgrades, dice };
         }
     });
     return ships;

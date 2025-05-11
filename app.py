@@ -13,9 +13,7 @@ def serve_static(filename):
 def index():
     return render_template("index.html")
 
-# Weapon types
-CANNON_TYPES = ["ionCannon", "plasmaCannon", "solitonCannon", "antimatterCannon"]
-MISSILE_TYPES = ["ionMissile", "plasmaMissile", "solitonMissile", "antimatterMissile"]
+# Weapon damage values
 WEAPON_DAMAGE = {
     "ion": 1,
     "plasma": 2,
@@ -23,22 +21,14 @@ WEAPON_DAMAGE = {
     "antimatter": 4,
 }
 
-def count_weapons(upgrades, types, suffix):
-    """Count the number of each weapon type in upgrades."""
-    return {
-        t.replace(suffix, ""): upgrades.count(t)
-        for t in types
-    }
-
 def expand_ships(ship_dict, side):
     """Expand ship data into a list of ship dicts for simulation."""
     ships = []
     for ship_type, info in ship_dict.items():
         count = info.get("count", 0)
-        upgrades = info.get("upgrades", [])
         stats = info.get("stats", {})
-        cannons = count_weapons(upgrades, CANNON_TYPES, "Cannon")
-        missiles = count_weapons(upgrades, MISSILE_TYPES, "Missile")
+        dice = info.get("dice", {"cannons": {}, "missiles": {}})
+        
         for i in range(count):
             ships.append({
                 "id": f"{side}-{ship_type}-{i+1}",
@@ -47,9 +37,10 @@ def expand_ships(ship_dict, side):
                 "side": side,
                 "plus": stats.get("computer", 0),
                 "minus": stats.get("shield", 0),
-                "cannons": cannons.copy(),
-                "missiles": missiles.copy(),
+                "cannons": dice["cannons"].copy(),
+                "missiles": dice["missiles"].copy(),
             })
+
     return ships
 
 def roll_dice(ship, opponent_minus, weapon_type):
@@ -114,6 +105,7 @@ def simulate_battle(attacker_ships, defender_ships):
 def submit_ships():
     data = request.get_json()
     attacker_ships = expand_ships(data.get("attacker", {}), "attacker")
+    print(attacker_ships)
     defender_ships = expand_ships(data.get("defender", {}), "defender")
     simulations = 1000
     attacker_victories = sum(

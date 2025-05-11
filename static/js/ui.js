@@ -13,7 +13,12 @@ function createUpgradeSlot(shipType, side, slotIndex) {
     
     // Add options
     select.appendChild(new Option('No upgrade', ''));
-    Object.entries(availableUpgrades).forEach(([upgradeId, upgrade]) => {
+    
+    // Sort upgrades by name
+    const sortedUpgrades = Object.entries(availableUpgrades)
+        .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+    
+    sortedUpgrades.forEach(([upgradeId, upgrade]) => {
         select.appendChild(new Option(upgrade.name, upgradeId));
     });
     
