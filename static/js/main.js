@@ -8,23 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Handle form submission
-    document.getElementById('ship-form').addEventListener('submit', e => {
+    document.getElementById('ship-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const shipData = {
             attacker: collectShipsForSide('attacker'),
             defender: collectShipsForSide('defender')
         };
-        fetch('/submit_ships', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(shipData)
-        })
-        .then(response => response.json())
-        .then(data => displayResults(data, shipData))
-        .catch(error => {
+        try {
+            const response = await fetch('/submit_ships', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(shipData)
+            });
+            const data = await response.json();
+            displayResults(data, shipData);
+        } catch (error) {
             console.error('Error:', error);
             alert('An error occurred while processing the battle.');
-        });
+        }
     });
 
     // Handle reset button

@@ -15,13 +15,23 @@
             <form id="ship-form">
                 <div class="battle-sides">
                     <div class="side attacker">
-                        <h2>Attacker</h2>
+                        <div class="side-header">
+                            <h2>Attacker</h2>
+                            <select id="attacker-race" class="form-control race-select">
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
                         <div id="attacker-ships" class="ships-container"></div>
                         <button type="button" id="add-attacker-ship" class="add-ship-btn">Add Ship</button>
                     </div>
                     
                     <div class="side defender">
-                        <h2>Defender</h2>
+                        <div class="side-header">
+                            <h2>Defender</h2>
+                            <select id="defender-race" class="form-control race-select">
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
                         <div id="defender-ships" class="ships-container"></div>
                         <button type="button" id="add-defender-ship" class="add-ship-btn">Add Ship</button>
                     </div>
@@ -29,7 +39,6 @@
                 
                 <div class="controls">
                     <button type="submit" id="submitBtn">Simulate Battle</button>
-                    <button type="button" id="reset-counts">Reset Counts</button>
                 </div>
             </form>
             

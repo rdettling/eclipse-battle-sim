@@ -238,6 +238,7 @@ const availableUpgrades = {
         name: "Flux Missile",
         effect: {
             ionMissile: 2,
+            initiative: 1,
         },
     },
     ionCannon: {
@@ -414,5 +415,150 @@ const availableUpgrades = {
             solitonMissile: 1,
             cost: 1,
         },
+    }
+};
+
+// Alien race configurations
+const alienRaces = {
+    human: {
+        name: "Human",
+        description: "Balanced race with no special bonuses",
+        shipOverrides: {}
+    },
+    orion_hegemony: {
+        name: "Orion Hegemony",
+        description: "Advanced technology with improved computers",
+        shipOverrides: {
+            interceptor: {
+                baseStats: {
+                    initiative: 3
+                },
+                defaultUpgrades: ["ionCannon", "nuclearDrive", "nuclearSource", 'gaussShield']
+            },
+            cruiser: {
+                baseStats: {
+                    initiative: 2,
+                    power: 2
+                },
+                defaultUpgrades: [
+                    "ionCannon",
+                    "nuclearDrive",
+                    "hull",
+                    "electronComputer",
+                    "nuclearSource",
+                    'gaussShield'
+                ]
+            },
+            dreadnaught: {
+                baseStats: {
+                    power: 3
+                },
+                defaultUpgrades: [
+                    "hull",
+                    "hull",
+                    "nuclearDrive",
+                    "nuclearSource",
+                    'electronComputer',
+                    'ionCannon',
+                    'ionCannon',
+                    'gaussShield'
+                ]
+            },
+            starbase: {
+                baseStats: {
+                    initiative: 5,
+                    power: 3
+                },
+                defaultUpgrades: [
+                    'hull',
+                    'hull',
+                    'electronComputer',
+                    'ionCannon',
+                    'gaussShield'
+                ]
+            }
+        }
+    },
+    planta: {
+        name: "Planta",
+        description: "Planta race with improved shields and computers",
+        shipOverrides: {
+            interceptor: {
+                baseStats: {
+                    initiative: 0,
+                    power: 2,
+                    computer: 1
+                },
+                upgradeSlots: 3,
+                defaultUpgrades: [
+                    'ionCannon',
+                    'nuclearSource',
+                    'nuclearDrive'
+                ]
+            },
+            cruiser: {
+                baseStats: {
+                    initiative: 0,
+                    power: 2,
+                    computer: 1
+                },
+                upgradeSlots: 5,
+                defaultUpgrades: [
+                    'ionCannon',
+                    'nuclearSource',
+                    'nuclearDrive',
+                    'hull',
+                ]
+            },
+            dreadnaught: {
+                baseStats: {
+                    power: 2,
+                    computer: 1
+                },
+                upgradeSlots: 7,
+                defaultUpgrades: [
+                    'hull',
+                    'hull',
+                    'nuclearDrive',
+                    'nuclearSource',
+                    'ionCannon',
+                    'ionCannon',
+                ]
+            },
+            starbase: {
+                baseStats: {
+                    initiative: 2,
+                    power: 5,
+                    computer: 1
+                },
+                upgradeSlots: 4,
+                defaultUpgrades: [
+                    'hull',
+                    'hull',
+                    'electronComputer',
+                    'ionCannon']
+            }
+        }
+    },
+    eridani_empire: {
+        name: "Eridani Empire",
+        description: "Eridani Empire race with improved shields and computers",
+        shipOverrides: {
+            interceptor: {
+                baseStats: {
+                    power: 1
+                }
+            },
+            cruiser: {
+                baseStats: {
+                    power: 1
+                }
+            },
+            dreadnaught: {
+                baseStats: {
+                    power: 1
+                }
+            }
+        }
     }
 };

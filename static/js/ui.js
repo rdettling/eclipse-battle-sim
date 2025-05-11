@@ -70,19 +70,34 @@ function createCountSelect(shipType, side) {
     return select;
 }
 
-/** Calculate stats for a ship type and side */
+/** Calculate stats for a ship type and side with race overrides */
 function calculateShipStats(shipType, side) {
-    const stats = { ...shipConfigs[shipType].baseStats };
+    const raceSelect = document.getElementById(`${side}-race`);
+    const selectedRace = alienRaces[raceSelect.value];
+    
+    // Start with base stats
+    let baseStats = { ...shipConfigs[shipType].baseStats };
+    
+    // Apply race overrides if they exist - replace stats instead of adding
+    if (selectedRace.shipOverrides[shipType]) {
+        const overrides = selectedRace.shipOverrides[shipType].baseStats || {};
+        Object.entries(overrides).forEach(([stat, value]) => {
+            baseStats[stat] = value; // Replace instead of add
+        });
+    }
+    
+    // Apply upgrade effects
     for (let i = 0; i < shipConfigs[shipType].upgradeSlots; i++) {
         const select = document.querySelector(`select[name="${side}_${shipType}_upgrade_${i}"]`);
         if (select && select.value) {
             const effect = availableUpgrades[select.value].effect || {};
             Object.entries(effect).forEach(([stat, value]) => {
-                stats[stat] = (stats[stat] || 0) + value;
+                baseStats[stat] = (baseStats[stat] || 0) + value;
             });
         }
     }
-    return stats;
+    
+    return baseStats;
 }
 
 /** Update the stats summary for a ship */
@@ -149,8 +164,34 @@ function createShipRow(shipType, side) {
         const upgradeSlots = row.querySelector('.upgrade-slots');
         const statsDiv = row.querySelector('.stats-summary-container');
         upgradeSlots.innerHTML = '';
-        for (let i = 0; i < shipConfigs[newType].upgradeSlots; i++) {
-            upgradeSlots.appendChild(createUpgradeSlot(newType, side, i));
+        
+        // Get race-specific configuration
+        const raceSelect = document.getElementById(`${side}-race`);
+        const selectedRace = alienRaces[raceSelect.value];
+        const raceConfig = selectedRace.shipOverrides[newType] || {};
+        
+        // Get number of upgrade slots (race override or default)
+        const numSlots = raceConfig.upgradeSlots || shipConfigs[newType].upgradeSlots;
+        const defaultUpgrades = raceConfig.defaultUpgrades || shipConfigs[newType].defaultUpgrades || [];
+        
+        for (let i = 0; i < numSlots; i++) {
+            const slot = createUpgradeSlot(newType, side, i);
+            // Set default upgrade if available
+            const select = slot.querySelector('select');
+            if (defaultUpgrades[i]) {
+                select.value = defaultUpgrades[i];
+                // Update visuals
+                const upgradeImage = slot.querySelector('.upgrade-image');
+                const emptyPlaceholder = slot.querySelector('.upgrade-placeholder');
+                if (upgradeImage) {
+                    upgradeImage.src = `/static/upgrades/${availableUpgrades[defaultUpgrades[i]].image}`;
+                    upgradeImage.style.display = 'block';
+                }
+                if (emptyPlaceholder) {
+                    emptyPlaceholder.style.display = 'none';
+                }
+            }
+            upgradeSlots.appendChild(slot);
         }
         statsDiv.id = `${side}-${newType}-stats`;
         updateShipStats(newType, side);
@@ -174,8 +215,34 @@ function createShipRow(shipType, side) {
     // Upgrades row
     const upgradeSlots = document.createElement('div');
     upgradeSlots.className = 'upgrade-slots';
-    for (let i = 0; i < shipConfigs[shipType].upgradeSlots; i++) {
-        upgradeSlots.appendChild(createUpgradeSlot(shipType, side, i));
+    
+    // Get race-specific configuration
+    const raceSelect = document.getElementById(`${side}-race`);
+    const selectedRace = alienRaces[raceSelect.value];
+    const raceConfig = selectedRace.shipOverrides[shipType] || {};
+    
+    // Get number of upgrade slots (race override or default)
+    const numSlots = raceConfig.upgradeSlots || shipConfigs[shipType].upgradeSlots;
+    const defaultUpgrades = raceConfig.defaultUpgrades || shipConfigs[shipType].defaultUpgrades || [];
+    
+    for (let i = 0; i < numSlots; i++) {
+        const slot = createUpgradeSlot(shipType, side, i);
+        // Set default upgrade if available
+        const select = slot.querySelector('select');
+        if (defaultUpgrades[i]) {
+            select.value = defaultUpgrades[i];
+            // Update visuals
+            const upgradeImage = slot.querySelector('.upgrade-image');
+            const emptyPlaceholder = slot.querySelector('.upgrade-placeholder');
+            if (upgradeImage) {
+                upgradeImage.src = `/static/upgrades/${availableUpgrades[defaultUpgrades[i]].image}`;
+                upgradeImage.style.display = 'block';
+            }
+            if (emptyPlaceholder) {
+                emptyPlaceholder.style.display = 'none';
+            }
+        }
+        upgradeSlots.appendChild(slot);
     }
     
     // Stats summary
@@ -277,3 +344,81 @@ function updateAddShipButtonVisibility(side) {
         btn.style.display = 'none';
     }
 }
+
+/** Initialize alien race selectors */
+function initializeRaceSelectors() {
+    const attackerSelect = document.getElementById('attacker-race');
+    const defenderSelect = document.getElementById('defender-race');
+    
+    // Populate options
+    Object.entries(alienRaces).forEach(([raceId, race]) => {
+        const option = new Option(race.name, raceId);
+        option.title = race.description;
+        attackerSelect.appendChild(option.cloneNode(true));
+        defenderSelect.appendChild(option);
+    });
+    
+    // Set default values
+    attackerSelect.value = 'human';
+    defenderSelect.value = 'human';
+    
+    // Add change listeners
+    attackerSelect.addEventListener('change', () => updateAllShipStats('attacker'));
+    defenderSelect.addEventListener('change', () => updateAllShipStats('defender'));
+}
+
+/** Update all ship stats for a side */
+function updateAllShipStats(side) {
+    const shipsDiv = document.getElementById(`${side}-ships`);
+    const raceSelect = document.getElementById(`${side}-race`);
+    const selectedRace = alienRaces[raceSelect.value];
+    
+    shipsDiv.querySelectorAll('.ship-row').forEach(row => {
+        const shipType = row.querySelector('.ship-type-select').value;
+        const upgradeSlots = row.querySelector('.upgrade-slots');
+        
+        // Get race-specific configuration
+        const raceConfig = selectedRace.shipOverrides[shipType] || {};
+        const numSlots = raceConfig.upgradeSlots || shipConfigs[shipType].upgradeSlots;
+        const defaultUpgrades = raceConfig.defaultUpgrades || shipConfigs[shipType].defaultUpgrades || [];
+        
+        // Clear existing slots
+        upgradeSlots.innerHTML = '';
+        
+        // Create new slots based on race configuration
+        for (let i = 0; i < numSlots; i++) {
+            const slot = createUpgradeSlot(shipType, side, i);
+            const select = slot.querySelector('select');
+            const upgradeImage = slot.querySelector('.upgrade-image');
+            const emptyPlaceholder = slot.querySelector('.upgrade-placeholder');
+            
+            if (defaultUpgrades[i]) {
+                select.value = defaultUpgrades[i];
+                if (upgradeImage) {
+                    upgradeImage.src = `/static/upgrades/${availableUpgrades[defaultUpgrades[i]].image}`;
+                    upgradeImage.style.display = 'block';
+                }
+                if (emptyPlaceholder) {
+                    emptyPlaceholder.style.display = 'none';
+                }
+            } else {
+                select.value = '';
+                if (upgradeImage) {
+                    upgradeImage.style.display = 'none';
+                }
+                if (emptyPlaceholder) {
+                    emptyPlaceholder.style.display = 'block';
+                }
+            }
+            upgradeSlots.appendChild(slot);
+        }
+        
+        updateShipStats(shipType, side);
+    });
+}
+
+// Add initialization call at the end of the file
+document.addEventListener('DOMContentLoaded', () => {
+    initializeRaceSelectors();
+    // ... any other initialization code ...
+});
